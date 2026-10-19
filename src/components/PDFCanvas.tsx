@@ -11,8 +11,10 @@ interface PDFCanvasProps {
   zoom: number;
   activeTool: ToolMode;
   selectedColor: string;
+  strokeSize: number;
   annotations: PageAnnotations;
   activeStampType: 'APROVADO' | 'CONFERIDO' | 'URGENTE' | 'MEDIDO GPR' | 'EM ANÁLISE' | null;
+  activeSignatureDataUrl: string | null;
   onUpdateAnnotations: (newAnnotations: PageAnnotations) => void;
 }
 
@@ -22,8 +24,10 @@ export const PDFCanvas: React.FC<PDFCanvasProps> = ({
   zoom,
   activeTool,
   selectedColor,
+  strokeSize,
   annotations,
   activeStampType,
+  activeSignatureDataUrl,
   onUpdateAnnotations,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -43,7 +47,6 @@ export const PDFCanvas: React.FC<PDFCanvasProps> = ({
       try {
         setIsRendering(true);
 
-        // Cancela tarefa de renderização anterior se estiver em andamento
         if (renderTaskRef.current) {
           renderTaskRef.current.cancel();
           renderTaskRef.current = null;
@@ -55,13 +58,13 @@ export const PDFCanvas: React.FC<PDFCanvasProps> = ({
         const effectiveRotation = (page.rotate + pageInfo.rotation) % 360;
         const dpr = window.devicePixelRatio || 1;
 
-        // Viewport CSS (tamanho visível)
+        // Viewport CSS (tamanho de visualização na tela)
         const cssViewport = page.getViewport({
           scale: zoom,
           rotation: effectiveRotation,
         });
 
-        // Viewport Canvas de Alta Resolução (HiDPI / Retina)
+        // Viewport HiDPI (resolução nativa nítida)
         const canvasViewport = page.getViewport({
           scale: zoom * dpr,
           rotation: effectiveRotation,
@@ -114,27 +117,29 @@ export const PDFCanvas: React.FC<PDFCanvasProps> = ({
   }, [pdfDoc, pageInfo.pageIndex, pageInfo.rotation, zoom]);
 
   return (
-    <div className="relative inline-block bg-white shadow-2xl rounded-sm overflow-hidden select-none border border-black/10">
+    <div className="relative inline-block bg-white shadow-2xl rounded-sm overflow-hidden select-none border border-black/30">
       {/* Canvas da página do PDF */}
       <canvas ref={canvasRef} className="block transition-all" />
 
-      {/* Camada interativa de anotações */}
+      {/* Camada interativa profissional no padrão Acrobat */}
       {dimensions.width > 0 && (
         <AnnotationOverlay
           width={dimensions.width}
           height={dimensions.height}
           activeTool={activeTool}
           selectedColor={selectedColor}
+          strokeSize={strokeSize}
           annotations={annotations}
           activeStampType={activeStampType}
+          activeSignatureDataUrl={activeSignatureDataUrl}
           onUpdateAnnotations={onUpdateAnnotations}
         />
       )}
 
-      {/* Indicador de renderização suave */}
+      {/* Indicador de renderização com glow dourado */}
       {isRendering && (
         <div className="absolute inset-0 bg-brand-dark/40 backdrop-blur-[1px] flex items-center justify-center pointer-events-none z-30">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-panel/90 border border-brand-cardBorder text-white text-xs shadow-lg">
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-panel/90 border border-brand-cardBorder text-white text-xs shadow-goldGlow">
             <Loader2 size={14} className="animate-spin text-amber-400" />
             <span>Processando página...</span>
           </div>

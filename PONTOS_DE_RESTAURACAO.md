@@ -22,22 +22,40 @@ Toda e qualquer restauração solicitada por você (ex: `PR.001`, `PR.002`, `PR.
 
 ---
 
-### [PR.002]
-- **Data/Hora:** 18/10/2026 23:06 (Horário Local)
-- **Commit Git:** `PR.002` (local e remoto no GitHub)
-- **Tag Git:** `PR.002` (local e remota no GitHub)
+### [PR.003]
+- **Data/Hora:** 18/10/2026 23:17 (Horário Local)
+- **Commit Git:** `PR.003` (local e remoto no GitHub)
+- **Tag Git:** `PR.003` (local e remota no GitHub)
 - **Status:** Ativo / Em Produção
 - **Links:**
   - Produção Oficial (Vercel): https://gpr-engine-pdf.vercel.app
   - Repositório GitHub: https://github.com/Wisterly/gpr-engine-pdf
   - Localhost: http://localhost:3000
 - **Resumo das Alterações Estruturais Contidas:**
-  1. **Redesenho visual completo para tema executivo de alto padrão (Luxury Obsidian & Gold)**.
-  2. Implementação de paleta luxuosa: fundos em preto ônix e obsidian profundo (`#08080b`, `#0f0f15`, `#15151f`), bordas com tom bronze e ouro envelhecido (`#2a2318`, `rgba(245, 158, 11, 0.28)`), e elementos em ouro vivo, champanhe, dourado nobre (`#f59e0b`) e laranja imperial (`#f97316`).
-  3. Botão de download final e seletores com gradientes metálicos em ouro e laranja (`gold-gradient`), com brilho dourado (`shadow-goldGlow`).
-  4. Barra de ferramentas e carimbos técnicos atualizados com a nova identidade visual sofisticada.
-  5. Scrollbars estilizadas em preto absoluto com detalhes em bronze e ouro.
-  6. PDF de teste gerado com novo padrão visual dourado e alaranjado de alta fidelidade.
+  1. **Engenharia Reversa Completa do Adobe Acrobat Pro (Layout, Ferramentas e Ergonomia)**:
+     - **Faixa Superior Global de Modos**: *Visualizar*, *Comentar & Anotar*, *Editar PDF*, *Organizar Páginas* e *Preencher & Assinar (Fill & Sign)*.
+     - **Barra de Ferramentas Contextual Dinâmica**: ferramentas adaptativas com paleta de cores nobres, espessura do traço e botões de ação rápida.
+     - **Dock Lateral de Ícones Verticais (Acrobat Left Rail)**: alternância entre miniaturas de páginas, linha do tempo de comentários com autor/página/hora e localizador de texto.
+     - **Módulo Fill & Sign Oficial**: modal interativo para criação de assinatura digital manuscrita ou caligráfica, vistos de aprovação (✓), marcação de erros (✗) e pontos de vistoria (•).
+     - **Notas Adesivas (Sticky Notes do Acrobat)**: balãozinhos de observações técnicas com popover de texto e autor.
+     - **Formas Geométricas**: inserção de retângulos, círculos, setas indicativas e linhas retas.
+     - **HUD Flutuante Inferior (Acrobat Bottom Pill)**: navegação rápida de páginas, alternância entre cursor de seleção e mãozinha (pan/arraste), e zoom rápido.
+     - **Histórico & Atalhos Oficiais**: suporte a Desfazer (`Ctrl+Z`), atalhos de seleção (`V`), mãozinha (`H`), realce (`U`), texto (`T`), nota adesiva (`S`) e zoom (`+`/`-`).
+  2. Preservação integral do tema executivo de alto padrão (*Luxury Obsidian & Gold*).
+
+---
+
+### [PR.002]
+- **Data/Hora:** 18/10/2026 23:06 (Horário Local)
+- **Commit Git:** `5c10aea`
+- **Tag Git:** `PR.002` (local e remota no GitHub)
+- **Status:** Arquivado / Sucessor: PR.003
+- **Links:**
+  - Produção Oficial (Vercel): https://gpr-engine-pdf.vercel.app
+  - Repositório GitHub: https://github.com/Wisterly/gpr-engine-pdf
+  - Localhost: http://localhost:3000
+- **Resumo das Alterações Estruturais Contidas:**
+  1. Redesenho visual completo para tema executivo de alto padrão (Luxury Obsidian & Gold).
 
 ---
 
@@ -50,11 +68,3 @@ Toda e qualquer restauração solicitada por você (ex: `PR.001`, `PR.002`, `PR.
   - Produção Oficial (Vercel): https://gpr-engine-pdf.vercel.app
   - Repositório GitHub: https://github.com/Wisterly/gpr-engine-pdf
   - Localhost: http://localhost:3000
-- **Resumo das Alterações Estruturais Contidas:**
-  1. Criação da suíte web completa com Next.js 14 (App Router), TypeScript e Tailwind CSS.
-  2. Implementação da barra superior completa com ferramentas de edição (Selecionar, Texto, Caneta, Marca-texto, Carimbos GPR, Zoom, Paginação e Download).
-  3. Painel lateral retrátil com miniaturas em tempo real, suporte a reordenação (cima/baixo), rotação de 90° e exclusão de páginas.
-  4. Viewport central com Canvas de alta fidelidade HiDPI via PDF.js e camada de sobreposição vetorial interativa com coordenadas normalizadas.
-  5. Motor de exportação com `pdf-lib` para download em 1 clique preservando as páginas e camadas.
-  6. Tela inicial com Drag & Drop e gerador de PDF de demonstração com 1 clique para testes imediatos.
-  7. Deploy automatizado na Vercel e versionamento completo no GitHub.
