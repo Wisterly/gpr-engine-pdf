@@ -45,7 +45,7 @@ const TOOL_CATEGORIES: ToolCategory[] = [
       { id: 'combine', name: 'Combinar arquivos', actionText: 'Abrir ▾', icon: 'combine', category: 'Criar e editar' },
       { id: 'organize', name: 'Organizar páginas', actionText: 'Abrir ▾', icon: 'organize', category: 'Criar e editar' },
       { id: 'edit', name: 'Editar PDF', actionText: 'Abrir ▾', icon: 'edit', category: 'Criar e editar' },
-      { id: 'export', name: 'Exportar PDF', actionText: 'Abrir ▾', icon: 'export', category: 'Criar e editar', description: 'Word, Excel, Imagem, CAD' },
+      { id: 'export', name: 'Exportar PDF', actionText: 'Abrir ▾', icon: 'export', category: 'Criar e editar', description: 'Word, Excel, CAD' },
       { id: 'scan', name: 'Aprimorar digitalizações', actionText: 'Abrir ▾', icon: 'scan', category: 'Criar e editar' },
       { id: 'media', name: 'Mídia avançada', actionText: 'Adicionar ▾', icon: 'media', category: 'Criar e editar' },
     ],
@@ -91,62 +91,62 @@ const TOOL_CATEGORIES: ToolCategory[] = [
   },
 ];
 
-const renderToolIcon = (iconName: string) => {
+const renderCleanIcon = (iconName: string) => {
   switch (iconName) {
     case 'create':
-      return <PlusCircle size={28} className="text-orange-vibrant" strokeWidth={1.75} />;
+      return <PlusCircle size={22} className="text-orange-vibrant" strokeWidth={1.75} />;
     case 'combine':
-      return <Layers size={28} className="text-gold-metallic" strokeWidth={1.75} />;
+      return <Layers size={22} className="text-gold-metallic" strokeWidth={1.75} />;
     case 'organize':
-      return <BookOpen size={28} className="text-gold-amber" strokeWidth={1.75} />;
+      return <BookOpen size={22} className="text-gold-amber" strokeWidth={1.75} />;
     case 'edit':
-      return <FileEdit size={28} className="text-orange-vibrant" strokeWidth={1.75} />;
+      return <FileEdit size={22} className="text-orange-vibrant" strokeWidth={1.75} />;
     case 'export':
-      return <FileOutput size={28} className="text-gold-metallic" strokeWidth={1.75} />;
+      return <FileOutput size={22} className="text-gold-metallic" strokeWidth={1.75} />;
     case 'scan':
-      return <Scan size={28} className="text-gold-amber" strokeWidth={1.75} />;
+      return <Scan size={22} className="text-gold-amber" strokeWidth={1.75} />;
     case 'media':
-      return <Video size={28} className="text-orange-vibrant" strokeWidth={1.75} />;
+      return <Video size={22} className="text-orange-vibrant" strokeWidth={1.75} />;
     case 'share':
-      return <Share2 size={28} className="text-gold-metallic" strokeWidth={1.75} />;
+      return <Share2 size={22} className="text-gold-metallic" strokeWidth={1.75} />;
     case 'review':
-      return <Send size={28} className="text-orange-vibrant" strokeWidth={1.75} />;
+      return <Send size={22} className="text-orange-vibrant" strokeWidth={1.75} />;
     case 'comment':
-      return <MessageSquare size={28} className="text-gold-metallic" strokeWidth={1.75} />;
+      return <MessageSquare size={22} className="text-gold-metallic" strokeWidth={1.75} />;
     case 'stamp':
-      return <Stamp size={28} className="text-gold-amber" strokeWidth={1.75} />;
+      return <Stamp size={22} className="text-gold-amber" strokeWidth={1.75} />;
     case 'compare':
-      return <GitCompare size={28} className="text-orange-vibrant" strokeWidth={1.75} />;
+      return <GitCompare size={22} className="text-orange-vibrant" strokeWidth={1.75} />;
     case 'measure':
-      return <Ruler size={28} className="text-gold-metallic" strokeWidth={1.75} />;
+      return <Ruler size={22} className="text-gold-metallic" strokeWidth={1.75} />;
     case 'fill_sign':
-      return <FileSignature size={28} className="text-orange-vibrant" strokeWidth={1.75} />;
+      return <FileSignature size={22} className="text-orange-vibrant" strokeWidth={1.75} />;
     case 'prepare_form':
-      return <FileSpreadsheet size={28} className="text-gold-metallic" strokeWidth={1.75} />;
+      return <FileSpreadsheet size={22} className="text-gold-metallic" strokeWidth={1.75} />;
     case 'certificates':
-      return <Award size={28} className="text-gold-amber" strokeWidth={1.75} />;
+      return <Award size={22} className="text-gold-amber" strokeWidth={1.75} />;
     case 'protect':
-      return <Shield size={28} className="text-gold-metallic" strokeWidth={1.75} />;
+      return <Shield size={22} className="text-gold-metallic" strokeWidth={1.75} />;
     case 'redact':
-      return <EyeOff size={28} className="text-orange-vibrant" strokeWidth={1.75} />;
+      return <EyeOff size={22} className="text-orange-vibrant" strokeWidth={1.75} />;
     case 'pdf_standards':
-      return <FileText size={28} className="text-gold-amber" strokeWidth={1.75} />;
+      return <FileText size={22} className="text-gold-amber" strokeWidth={1.75} />;
     case 'optimize':
-      return <Zap size={28} className="text-gold-metallic" strokeWidth={1.75} />;
+      return <Zap size={22} className="text-gold-metallic" strokeWidth={1.75} />;
     case 'print_prod':
-      return <Printer size={28} className="text-orange-vibrant" strokeWidth={1.75} />;
+      return <Printer size={22} className="text-orange-vibrant" strokeWidth={1.75} />;
     case 'accessibility':
-      return <Sparkles size={28} className="text-gold-amber" strokeWidth={1.75} />;
+      return <Sparkles size={22} className="text-gold-amber" strokeWidth={1.75} />;
     case 'custom_tool':
-      return <Sliders size={28} className="text-gold-metallic" strokeWidth={1.75} />;
+      return <Sliders size={22} className="text-gold-metallic" strokeWidth={1.75} />;
     case 'action_wizard':
-      return <PlayCircle size={28} className="text-orange-vibrant" strokeWidth={1.75} />;
+      return <PlayCircle size={22} className="text-orange-vibrant" strokeWidth={1.75} />;
     case 'index_tool':
-      return <Bookmark size={28} className="text-gold-amber" strokeWidth={1.75} />;
+      return <Bookmark size={22} className="text-gold-amber" strokeWidth={1.75} />;
     case 'js_tool':
-      return <Code size={28} className="text-gold-metallic" strokeWidth={1.75} />;
+      return <Code size={22} className="text-gold-metallic" strokeWidth={1.75} />;
     default:
-      return <FileText size={28} className="text-gold-metallic" strokeWidth={1.75} />;
+      return <FileText size={22} className="text-gold-metallic" strokeWidth={1.75} />;
   }
 };
 
@@ -169,81 +169,75 @@ export const ToolsCatalogScreen: React.FC<ToolsCatalogScreenProps> = ({ onSelect
   return (
     <div className="flex-1 flex overflow-hidden bg-obsidian-bg select-none">
       <div className="flex-1 flex flex-col overflow-y-auto">
-        {/* Topo: Barra ampla de Pesquisa de Ferramentas */}
-        <div className="sticky top-0 z-10 px-8 py-5 bg-obsidian-panel/95 backdrop-blur border-b border-obsidian-border flex items-center justify-between gap-4">
-          <div className="relative max-w-xl w-full">
+        {/* Topo: Barra de Pesquisa Compacta */}
+        <div className="sticky top-0 z-10 px-8 py-3.5 bg-obsidian-panel/90 backdrop-blur border-b border-obsidian-border flex items-center justify-between gap-4">
+          <div className="relative max-w-lg w-full">
             <input
               type="text"
               placeholder="Ferramentas de pesquisa..."
               value={filterQuery}
               onChange={(e) => setFilterQuery(e.target.value)}
-              className="w-full bg-obsidian-bg border border-obsidian-border rounded-2xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-brand-muted outline-none focus:border-gold-metallic transition-all shadow-inner"
+              className="w-full bg-obsidian-bg border border-obsidian-border rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-brand-muted outline-none focus:border-gold-metallic transition-all shadow-inner"
             />
-            <Search size={16} className="absolute left-3.5 top-3 text-gold-metallic pointer-events-none" />
+            <Search size={15} className="absolute left-3 top-2.5 text-gold-metallic pointer-events-none" />
           </div>
 
           <div className="flex items-center gap-2 text-xs text-brand-muted">
-            <span>Catálogo Completo GPR</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-orange-vibrant animate-ping" />
+            <span className="text-[11px]">Catálogo GPR</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-orange-vibrant" />
           </div>
         </div>
 
-        {/* Área Central: Grid Categorizado em 5 Seções */}
-        <div className="p-8 space-y-10 max-w-7xl w-full mx-auto">
+        {/* 
+          [PONTO DE CONTROLE: PC-5]
+          Layout Clean, sem bordas quadradas pesadas ao redor dos ícones,
+          altura reduzida, espaçamento compacto e visual fluído.
+        */}
+        <div className="p-6 space-y-7 max-w-6xl w-full mx-auto">
           {filteredCategories.map((cat) => (
-            <section key={cat.title} className="space-y-4">
-              <div className="flex items-center justify-between pb-2 border-b border-obsidian-border">
-                <h3 className="text-sm font-extrabold text-white tracking-wide uppercase flex items-center gap-2">
-                  <span className="w-2 h-2 rounded bg-gradient-orange-gold" />
+            <section key={cat.title} className="space-y-2.5">
+              <div className="flex items-center justify-between pb-1.5 border-b border-obsidian-border/50">
+                <h3 className="text-xs font-black text-white tracking-wide uppercase flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-gradient-orange-gold" />
                   <span>{cat.title}</span>
                 </h3>
-                <span className="text-[11px] font-mono text-brand-mutedGold">
-                  {cat.items.length} ferramentas
+                <span className="text-[10px] font-mono text-brand-mutedGold">
+                  {cat.items.length} itens
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
+              {/* Grid Compacto e Clean (Sem caixas ou bordas pesadas ao redor) */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-2">
                 {cat.items.map((tool) => (
                   <div
                     key={tool.id}
                     onClick={() => onSelectTool(tool.id)}
-                    className="relative flex flex-col items-center justify-between p-4 rounded-2xl bg-obsidian-panel border border-obsidian-border hover:border-gold-metallic/50 hover:bg-obsidian-hover transition-all cursor-pointer group shadow-subtle text-center min-h-[175px]"
+                    className="relative flex flex-col items-center justify-between p-2 rounded-xl hover:bg-obsidian-panel/60 transition-all cursor-pointer group text-center min-h-[115px]"
                   >
                     {/* Selo NOVO */}
                     {tool.isNew && (
-                      <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-gradient-orange-gold text-black shadow-sm">
+                      <span className="absolute top-1 right-1 px-1 py-0.2 rounded text-[7px] font-black uppercase tracking-wider bg-gradient-orange-gold text-black shadow-sm">
                         NOVO
                       </span>
                     )}
 
-                    {/* Ícone Grande Estilizado */}
-                    <div className="w-14 h-14 rounded-2xl bg-obsidian-card border border-obsidian-border flex items-center justify-center my-1 group-hover:scale-110 transition-transform shadow-sm">
-                      {renderToolIcon(tool.icon)}
+                    {/* Ícone Puro Flutuante (Sem caixa quadrada com bordas) */}
+                    <div className="my-1 text-gold-metallic group-hover:scale-115 transition-transform duration-200">
+                      {renderCleanIcon(tool.icon)}
                     </div>
 
                     {/* Nome da Ferramenta */}
-                    <div className="w-full my-1">
-                      <h4 className="text-xs font-bold text-white group-hover:text-gold-metallic transition-colors leading-tight line-clamp-2">
-                        {tool.name}
-                      </h4>
-                      {tool.description && (
-                        <p className="text-[10px] text-brand-muted mt-0.5 truncate">
-                          {tool.description}
-                        </p>
-                      )}
-                    </div>
+                    <h4 className="text-[11px] font-semibold text-brand-text group-hover:text-gold-metallic transition-colors leading-tight line-clamp-2 px-1">
+                      {tool.name}
+                    </h4>
 
-                    {/* Botão Dropdown Abrir ou Adicionar */}
+                    {/* Botão Dropdown Clean */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         onSelectTool(tool.id);
                       }}
-                      className={`w-full py-1 px-2.5 rounded-xl text-[11px] font-semibold border flex items-center justify-center gap-1 transition-all ${
-                        tool.actionText.includes('Abrir')
-                          ? 'bg-obsidian-card hover:bg-gradient-orange-gold hover:text-black hover:border-transparent text-white border-obsidian-border'
-                          : 'bg-obsidian-card hover:bg-obsidian-panelDark text-brand-muted hover:text-white border-obsidian-border'
-                      }`}
+                      className="mt-1 py-0.5 px-2.5 rounded-lg text-[10px] font-medium text-brand-muted group-hover:text-white border border-transparent group-hover:border-obsidian-border hover:bg-obsidian-panelDark transition-all"
                     >
                       <span>{tool.actionText}</span>
                     </button>
