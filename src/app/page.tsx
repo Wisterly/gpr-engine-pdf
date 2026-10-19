@@ -22,6 +22,8 @@ import { formatFileSize } from '@/lib/utils';
 import {
   persistUserFile,
   getPersistedUserFiles,
+  getRecentFilesMeta,
+  getFileBufferFromIndexedDB,
   togglePersistedFavorite,
 } from '@/lib/storage';
 
@@ -70,8 +72,19 @@ export default function GPREngineMain() {
   // Arquivos Recentes (Inicial + Persistidos)
   const [recentFiles, setRecentFiles] = useState<RecentFile[]>(INITIAL_RECENT_FILES);
 
-  // Carrega permanentemente do IndexedDB todos os PDFs reais que o usuário já anexou
+  // Carrega permanentemente do localStorage e IndexedDB todos os PDFs reais que o usuário já anexou
   useEffect(() => {
+    // 1. Síncrono e imediato: carrega metadados salvos no localStorage (garante exibição instantânea no F5)
+    const localMeta = getRecentFilesMeta();
+    if (localMeta && localMeta.length > 0) {
+      setRecentFiles((prev) => {
+        const persistedNames = new Set(localMeta.map((f) => f.name));
+        const filteredDefaults = prev.filter((f) => !persistedNames.has(f.name));
+        return [...localMeta, ...filteredDefaults];
+      });
+    }
+
+    // 2. Assíncrono: carrega os registros com buffers completos do IndexedDB
     const loadPersistedDocuments = async () => {
       try {
         const persisted = await getPersistedUserFiles();
@@ -274,11 +287,10 @@ export default function GPREngineMain() {
     async (file: RecentFile) => {
       let buffer = file.fileBuffer ? (file.fileBuffer.slice(0) as ArrayBuffer) : undefined;
       if (!buffer || buffer.byteLength === 0) {
-        // Tenta recuperar do IndexedDB
-        const persistedFiles = await getPersistedUserFiles();
-        const found = persistedFiles.find((p) => p.id === file.id || p.name === file.name);
-        if (found && found.fileBuffer && found.fileBuffer.byteLength > 0) {
-          buffer = found.fileBuffer.slice(0) as ArrayBuffer;
+        // Tenta recuperar do IndexedDB por ID ou por Nome do arquivo
+        const dbBuffer = (await getFileBufferFromIndexedDB(file.id)) || (await getFileBufferFromIndexedDB(file.name));
+        if (dbBuffer && dbBuffer.byteLength > 0) {
+          buffer = dbBuffer;
         } else {
           buffer = await generateInMemoryPDF(file.name);
         }
@@ -418,14 +430,34 @@ export default function GPREngineMain() {
     ]);
   };
 
-  // Carrega arquivo extra do disco na tela de combinação
+  // Carrega arquivo extra do disco na tela de combinação e persiste imediatamente
   const handleAddLocalFileForCombine = async (file: File) => {
+    const docId = `doc_${Date.now()}`;
     const buffer = await file.arrayBuffer();
+    const arrayBuf = buffer.slice(0) as ArrayBuffer;
+
+    const newRecent: RecentFile = {
+      id: docId,
+      name: file.name,
+      openedAt: 'Agora',
+      size: formatFileSize(file.size),
+      sizeBytes: file.size,
+      fileBuffer: arrayBuf,
+    };
+
+    // Grava imediatamente no histórico de recentes e no banco permanente (IndexedDB + localStorage)!
+    await persistUserFile(newRecent);
+
+    setRecentFiles((prev) => [
+      newRecent,
+      ...prev.filter((f) => f.name !== file.name),
+    ]);
+
     return {
-      id: `add_${Date.now()}`,
+      id: docId,
       name: file.name,
       size: formatFileSize(file.size),
-      fileBuffer: buffer,
+      fileBuffer: arrayBuf,
     };
   };
 

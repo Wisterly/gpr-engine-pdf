@@ -1,11 +1,12 @@
-// Utilitário de persistência robusto no navegador usando IndexedDB para buffers pesados (PDFs) e LocalStorage para preferências.
-// Garante que nenhum arquivo, configuração, ajuste ou personalização do usuário seja perdido em reloads ou novos deploys.
+// Sistema de Persistência Dual-Layer (LocalStorage para Metadados Instantâneos + IndexedDB para Buffers Binários de PDFs).
+// Garante que TODOS os arquivos anexados, históricos de recentes e configurações sobrevivam a recarregamentos (F5) e deploys.
 
 import { RecentFile } from '@/types/pdf';
 
 const DB_NAME = 'GPR_ENGINE_DB';
 const DB_VERSION = 1;
 const STORE_PDFS = 'user_pdfs';
+const META_STORAGE_KEY = 'gpr_persisted_recent_files_meta';
 
 function openDatabase(): Promise<IDBDatabase | null> {
   if (typeof window === 'undefined' || !window.indexedDB) {
@@ -19,7 +20,8 @@ function openDatabase(): Promise<IDBDatabase | null> {
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result;
         if (!db.objectStoreNames.contains(STORE_PDFS)) {
-          db.createObjectStore(STORE_PDFS, { keyPath: 'id' });
+          const store = db.createObjectStore(STORE_PDFS, { keyPath: 'id' });
+          store.createIndex('name', 'name', { unique: false });
         }
       };
 
@@ -39,9 +41,54 @@ function openDatabase(): Promise<IDBDatabase | null> {
 }
 
 /**
- * Salva permanentemente um arquivo PDF carregado pelo usuário no navegador.
+ * Salva metadados de forma síncrona no localStorage para carregamento imediato (zero delay em F5).
+ */
+export function saveRecentFileMeta(file: RecentFile): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const existing = getRecentFilesMeta();
+    const updated: RecentFile[] = [
+      {
+        id: file.id,
+        name: file.name,
+        openedAt: file.openedAt,
+        size: file.size,
+        sizeBytes: file.sizeBytes,
+        isFavorite: !!file.isFavorite,
+      },
+      ...existing.filter((f) => f.name !== file.name && f.id !== file.id),
+    ];
+    localStorage.setItem(META_STORAGE_KEY, JSON.stringify(updated));
+  } catch (e) {
+    console.warn('Erro ao salvar metadados no localStorage:', e);
+  }
+}
+
+/**
+ * Lê metadados de arquivos recentes salvos no localStorage instantaneamente.
+ */
+export function getRecentFilesMeta(): RecentFile[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(META_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (e) {
+    console.warn('Erro ao ler metadados do localStorage:', e);
+  }
+  return [];
+}
+
+/**
+ * Salva permanentemente um arquivo PDF no banco de dados local (IndexedDB) e metadados no localStorage.
  */
 export async function persistUserFile(file: RecentFile): Promise<void> {
+  // 1. Salva metadados instantaneamente
+  saveRecentFileMeta(file);
+
+  // 2. Salva o buffer binário completo no IndexedDB
   const db = await openDatabase();
   if (!db) return;
 
@@ -50,7 +97,6 @@ export async function persistUserFile(file: RecentFile): Promise<void> {
       const tx = db.transaction(STORE_PDFS, 'readwrite');
       const store = tx.objectStore(STORE_PDFS);
 
-      // Clona o objeto preservando os campos essenciais e o buffer binário
       const record = {
         id: file.id,
         name: file.name,
@@ -58,14 +104,17 @@ export async function persistUserFile(file: RecentFile): Promise<void> {
         size: file.size,
         sizeBytes: file.sizeBytes,
         isFavorite: !!file.isFavorite,
-        fileBuffer: file.fileBuffer || null,
+        fileBuffer: file.fileBuffer ? (file.fileBuffer.slice(0) as ArrayBuffer) : null,
         timestamp: Date.now(),
       };
 
       store.put(record);
 
       tx.oncomplete = () => resolve();
-      tx.onerror = () => resolve();
+      tx.onerror = (e) => {
+        console.warn('Erro no put do IndexedDB:', e);
+        resolve();
+      };
     } catch (e) {
       console.warn('Erro ao persistir arquivo no IndexedDB:', e);
       resolve();
@@ -74,7 +123,7 @@ export async function persistUserFile(file: RecentFile): Promise<void> {
 }
 
 /**
- * Carrega todos os arquivos anexados pelo usuário já salvos no navegador.
+ * Carrega todos os arquivos persistidos com seus respectivos buffers binários do IndexedDB.
  */
 export async function getPersistedUserFiles(): Promise<RecentFile[]> {
   const db = await openDatabase();
@@ -88,8 +137,8 @@ export async function getPersistedUserFiles(): Promise<RecentFile[]> {
 
       request.onsuccess = () => {
         const results = request.result || [];
-        // Ordena por data decrescente
         results.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
         const files: RecentFile[] = results.map((item) => ({
           id: item.id,
           name: item.name,
@@ -97,7 +146,7 @@ export async function getPersistedUserFiles(): Promise<RecentFile[]> {
           size: item.size,
           sizeBytes: item.sizeBytes,
           isFavorite: item.isFavorite,
-          fileBuffer: item.fileBuffer ? item.fileBuffer : undefined,
+          fileBuffer: item.fileBuffer ? (item.fileBuffer.slice(0) as ArrayBuffer) : undefined,
         }));
         resolve(files);
       };
@@ -111,9 +160,57 @@ export async function getPersistedUserFiles(): Promise<RecentFile[]> {
 }
 
 /**
- * Atualiza o status de favorito de um arquivo persistido.
+ * Busca o ArrayBuffer de um PDF específico por ID ou por Nome.
+ */
+export async function getFileBufferFromIndexedDB(idOrName: string): Promise<ArrayBuffer | null> {
+  const db = await openDatabase();
+  if (!db) return null;
+
+  return new Promise((resolve) => {
+    try {
+      const tx = db.transaction(STORE_PDFS, 'readonly');
+      const store = tx.objectStore(STORE_PDFS);
+
+      // Tenta por ID
+      const reqId = store.get(idOrName);
+      reqId.onsuccess = () => {
+        if (reqId.result && reqId.result.fileBuffer) {
+          resolve(reqId.result.fileBuffer.slice(0) as ArrayBuffer);
+          return;
+        }
+
+        // Se não achou por ID, varre todos para achar por nome
+        const reqAll = store.getAll();
+        reqAll.onsuccess = () => {
+          const match = (reqAll.result || []).find((item) => item.name === idOrName);
+          if (match && match.fileBuffer) {
+            resolve(match.fileBuffer.slice(0) as ArrayBuffer);
+          } else {
+            resolve(null);
+          }
+        };
+        reqAll.onerror = () => resolve(null);
+      };
+
+      reqId.onerror = () => resolve(null);
+    } catch {
+      resolve(null);
+    }
+  });
+}
+
+/**
+ * Alterna o status de favorito de um arquivo no localStorage e IndexedDB.
  */
 export async function togglePersistedFavorite(fileId: string, isFavorite: boolean): Promise<void> {
+  if (typeof window !== 'undefined') {
+    try {
+      const meta = getRecentFilesMeta();
+      const updated = meta.map((f) => (f.id === fileId ? { ...f, isFavorite } : f));
+      localStorage.setItem(META_STORAGE_KEY, JSON.stringify(updated));
+    } catch {}
+  }
+
   const db = await openDatabase();
   if (!db) return;
 
@@ -138,7 +235,7 @@ export async function togglePersistedFavorite(fileId: string, isFavorite: boolea
 }
 
 /**
- * Salva preferência genérica do usuário em localStorage
+ * Salva preferência genérica do usuário em localStorage.
  */
 export function saveUserPreference<T>(key: string, value: T): void {
   if (typeof window === 'undefined') return;
@@ -150,7 +247,7 @@ export function saveUserPreference<T>(key: string, value: T): void {
 }
 
 /**
- * Obtém preferência genérica do usuário do localStorage
+ * Obtém preferência genérica do usuário do localStorage.
  */
 export function getUserPreference<T>(key: string, defaultValue: T): T {
   if (typeof window === 'undefined') return defaultValue;

@@ -22,11 +22,29 @@ Toda e qualquer restauração solicitada por você (ex: `PR.001`, `PR.002`, `PR.
 
 ---
 
+### [PR.009]
+- **Data/Hora:** 19/10/2026 00:40 (Horário Local)
+- **Commit Git:** `PR.009` (local e remoto no GitHub)
+- **Tag Git:** `PR.009` (local e remota no GitHub)
+- **Status:** Ativo / Em Produção
+- **Links:**
+  - Produção Oficial (Vercel): https://gpr-engine-pdf.vercel.app
+  - Repositório GitHub: https://github.com/Wisterly/gpr-engine-pdf
+  - Localhost: http://localhost:3000
+
+#### 🎯 NOVIDADES & CORREÇÃO DE PERSISTÊNCIA TOTAL (PR.009):
+- **Arquitetura Dual-Layer de Persistência Imediata (LocalStorage Síncrono + IndexedDB)**:
+  - *Zero Perda em F5*: Metadados de cada arquivo anexado são gravados síncronamente no `localStorage`. Ao recarregar a página (F5), a lista de recentes é renderizada imediatamente sem perder nenhum arquivo colocado pelo usuário.
+  - *Gravação em Todos os Pontos de Entrada*: O botão "Adicionar outro PDF" da modal de combinação agora também grava imediatamente o arquivo no histórico de recentes e no banco de dados permanente.
+  - *Abertura com 1 Clique do Histórico*: Clicar em qualquer documento do histórico recente recupera instantaneamente o buffer binário do banco local (`getFileBufferFromIndexedDB`) e abre o PDF na aba ativa.
+
+---
+
 ### [PR.008]
 - **Data/Hora:** 19/10/2026 00:31 (Horário Local)
 - **Commit Git:** `PR.008` (local e remoto no GitHub)
 - **Tag Git:** `PR.008` (local e remota no GitHub)
-- **Status:** Ativo / Em Produção
+- **Status:** Arquivado / Sucessor: PR.009
 - **Links:**
   - Produção Oficial (Vercel): https://gpr-engine-pdf.vercel.app
   - Repositório GitHub: https://github.com/Wisterly/gpr-engine-pdf
