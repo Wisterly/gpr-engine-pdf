@@ -22,11 +22,30 @@ Toda e qualquer restauração solicitada por você (ex: `PR.001`, `PR.002`, `PR.
 
 ---
 
+### [PR.006]
+- **Data/Hora:** 19/10/2026 00:02 (Horário Local)
+- **Commit Git:** `PR.006` (local e remoto no GitHub)
+- **Tag Git:** `PR.006` (local e remota no GitHub)
+- **Status:** Ativo / Em Produção
+- **Links:**
+  - Produção Oficial (Vercel): https://gpr-engine-pdf.vercel.app
+  - Repositório GitHub: https://github.com/Wisterly/gpr-engine-pdf
+  - Localhost: http://localhost:3000
+
+#### 🎯 NOVIDADES & FUNCIONALIDADES IMPLEMENTADAS (PR.006):
+- **Ferramenta Funcional de Combinar Arquivos (Merge PDF com `pdf-lib`)**:
+  - *Fluxo de Seleção*: Ao clicar em "Combinar arquivos" (seja na barra rápida da Home, no Catálogo de Ferramentas ou no menu contextual), abre-se a modal de seleção avançada.
+  - *Seleção Múltipla & Reordenação*: Permite marcar/desmarcar PDFs abertos na sessão e na lista de recentes, adicionar novos arquivos locais via upload, e ordenar a sequência de páginas (para cima / para baixo).
+  - *Geração e Nova Aba*: O motor `pdf-lib` funde as páginas em alta performance e cria automaticamente uma nova aba de documento ativa (`DOCUMENTO_COMBINADO_GPR_[hora].pdf`) já renderizada pelo visualizador e pronta para download/edição.
+  - *Preservação dos Pontos de Controle Anteriores*: [PC.1] a [PC.5] permanecem preservados e independentes.
+
+---
+
 ### [PR.005]
 - **Data/Hora:** 18/10/2026 23:53 (Horário Local)
 - **Commit Git:** `PR.005` (local e remoto no GitHub)
 - **Tag Git:** `PR.005` (local e remota no GitHub)
-- **Status:** Ativo / Em Produção
+- **Status:** Arquivado / Sucessor: PR.006
 - **Links:**
   - Produção Oficial (Vercel): https://gpr-engine-pdf.vercel.app
   - Repositório GitHub: https://github.com/Wisterly/gpr-engine-pdf

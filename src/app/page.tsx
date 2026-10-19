@@ -8,7 +8,6 @@ import {
   RecentFile,
   LoadedPDFDocument,
   PDFPageInfo,
-  PageAnnotations,
 } from '@/types/pdf';
 import { GlobalHeader } from '@/components/GlobalHeader';
 import { HomeScreen } from '@/components/HomeScreen';
@@ -16,10 +15,11 @@ import { ToolsCatalogScreen } from '@/components/ToolsCatalogScreen';
 import { DocumentTabView } from '@/components/DocumentTabView';
 import { SignatureModal } from '@/components/SignatureModal';
 import { StampPicker } from '@/components/StampPicker';
+import { CombineFilesModal } from '@/components/CombineFilesModal';
+import { combinePDFDocuments, CombineFileInput } from '@/lib/pdfCombine';
 import { generateExportedPDF } from '@/lib/pdfExport';
 import { formatFileSize } from '@/lib/utils';
 
-// Arquivos Recentes Pré-populados do Sistema GPR
 const INITIAL_RECENT_FILES: RecentFile[] = [
   {
     id: 'rec_1',
@@ -68,34 +68,34 @@ export default function GPREngineMain() {
   // Documentos Abertos (Chave: docId)
   const [openDocuments, setOpenDocuments] = useState<Record<string, LoadedPDFDocument>>({});
 
-  // Modais de Assinatura e Carimbo
+  // Modais de Assinatura, Carimbo e COMBINAR ARQUIVOS
   const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
   const [isStampPickerOpen, setIsStampPickerOpen] = useState(false);
+  const [isCombineModalOpen, setIsCombineModalOpen] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Função auxiliar para criar PDF em memória com pdf-lib quando abrir arquivo recente
+  // Gera documento de demonstração com pdf-lib para os arquivos de exemplo
   const generateInMemoryPDF = async (docTitle: string): Promise<ArrayBuffer> => {
     const doc = await PDFDocument.create();
     const fontBold = await doc.embedFont(StandardFonts.HelveticaBold);
     const fontRegular = await doc.embedFont(StandardFonts.Helvetica);
 
-    // Página 1
     const page1 = doc.addPage([595, 842]);
     page1.drawText('GPR ENGINE - GOVERNO DO ESTADO DO PIAUÍ / SEDUC', {
       x: 50,
       y: 780,
       size: 15,
       font: fontBold,
-      color: rgb(0.83, 0.68, 0.21), // Ouro Metálico
+      color: rgb(0.83, 0.68, 0.21),
     });
 
     page1.drawText(docTitle, {
       x: 50,
       y: 755,
-      size: 18,
+      size: 17,
       font: fontBold,
-      color: rgb(1, 0.42, 0), // Laranja Vibrante
+      color: rgb(1, 0.42, 0),
     });
 
     page1.drawRectangle({
@@ -108,7 +108,7 @@ export default function GPREngineMain() {
       color: rgb(0.04, 0.04, 0.05),
     });
 
-    page1.drawText('Documento Oficial Carregado na Suíte GPR Engine:', {
+    page1.drawText('Documento Inicial Carregado no Sistema:', {
       x: 70,
       y: 700,
       size: 13,
@@ -117,39 +117,29 @@ export default function GPREngineMain() {
     });
 
     const lines = [
-      '• Visualização com renderização vetorial de alta resolução Canvas;',
-      '• Ferramentas completas estilo Adobe Acrobat Pro (Comentários, Formas, Assinatura);',
-      '• Caixa lateral retrátil à direita com acesso direto às 12 ferramentas de engenharia;',
-      '• Gaveta lateral à esquerda para visualização de miniaturas de páginas e reordenação;',
-      '• Exportação preservando 100% das camadas originais e novos carimbos.',
+      '• Documento pronto para edição, anotações e combinação;',
+      '• Pode ser mesclado com outros relatórios técnicos via "Combinar Arquivos";',
+      '• Renderização vetorial HiDPI em Canvas pura via PDF.js;',
+      '• Exportação preservando 100% das páginas originais.',
     ];
 
     lines.forEach((l, i) => {
       page1.drawText(l, {
         x: 70,
-        y: 670 - i * 20,
-        size: 10,
+        y: 670 - i * 22,
+        size: 11,
         font: fontRegular,
         color: rgb(0.88, 0.88, 0.9),
       });
     });
 
-    // Página 2 (Para testar paginação)
     const page2 = doc.addPage([595, 842]);
-    page2.drawText('ANEXO TÉCNICO - FOLHA DE MEDIÇÕES E VISTORIAS', {
+    page2.drawText(`FOLHA DE ANEXOS - ${docTitle.slice(0, 30)}`, {
       x: 50,
       y: 780,
-      size: 16,
+      size: 15,
       font: fontBold,
       color: rgb(0.83, 0.68, 0.21),
-    });
-
-    page2.drawText('Página 2 de 2 - Registros e assinaturas técnicas de campo.', {
-      x: 50,
-      y: 755,
-      size: 12,
-      font: fontRegular,
-      color: rgb(0.7, 0.7, 0.7),
     });
 
     const bytes = await doc.save();
@@ -227,7 +217,6 @@ export default function GPREngineMain() {
       const buffer = await file.arrayBuffer();
       await loadDocumentFromBuffer(docId, file.name, buffer, file.size);
 
-      // Adiciona aos recentes
       setRecentFiles((prev) => [
         {
           id: docId,
@@ -304,21 +293,80 @@ export default function GPREngineMain() {
     }));
   };
 
-  // Atalhos de Ferramentas Rápidas
-  const handleToolSelection = (toolId: string) => {
+  // Lógica de COMBINAR ARQUIVOS (Merge PDFs em nova aba)
+  const handleExecuteCombine = async (selectedFiles: CombineFileInput[]) => {
+    // Mescla os PDFs com pdf-lib
+    const mergedBytes = await combinePDFDocuments(selectedFiles);
+    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).replace(':', 'h');
+    const combinedDocName = `DOCUMENTO_COMBINADO_GPR_${timeStr}.pdf`;
+    const combinedDocId = `combined_${Date.now()}`;
+    const arrayBuffer = mergedBytes.buffer as ArrayBuffer;
+
+    // Carrega como novo documento ativo em uma nova aba
+    await loadDocumentFromBuffer(combinedDocId, combinedDocName, arrayBuffer, arrayBuffer.byteLength);
+
+    // Registra na lista de recentes
+    setRecentFiles((prev) => [
+      {
+        id: combinedDocId,
+        name: combinedDocName,
+        openedAt: 'Agora (Combinado)',
+        size: formatFileSize(arrayBuffer.byteLength),
+        sizeBytes: arrayBuffer.byteLength,
+        fileBuffer: arrayBuffer,
+        isFavorite: true,
+      },
+      ...prev,
+    ]);
+  };
+
+  // Carrega arquivo extra do disco na tela de combinação
+  const handleAddLocalFileForCombine = async (file: File) => {
+    const buffer = await file.arrayBuffer();
+    return {
+      id: `add_${Date.now()}`,
+      name: file.name,
+      size: formatFileSize(file.size),
+      fileBuffer: buffer,
+    };
+  };
+
+  // Atalhos de Ferramentas Rápidas e Botões
+  const handleToolSelection = async (toolId: string) => {
     if (toolId === 'create') {
       fileInputRef.current?.click();
+    } else if (toolId === 'combine') {
+      // Abre o Modal de Seleção para Combinar Arquivos!
+      setIsCombineModalOpen(true);
     } else if (toolId === 'fill_sign') {
       setIsSignatureModalOpen(true);
     } else if (toolId === 'stamp') {
       setIsStampPickerOpen(true);
     } else {
-      // Se não houver documento aberto, abre o primeiro dos recentes para permitir testar a ferramenta imediatamente
       if (!openDocuments[activeTabId]) {
-        handleOpenRecentFile(recentFiles[0]);
+        await handleOpenRecentFile(recentFiles[0]);
       }
     }
   };
+
+  // Prepara lista de arquivos disponíveis para o modal de combinação
+  // Combina documentos atualmente abertos + recentes para fácil seleção
+  const filesAvailableForCombine = [
+    ...Object.values(openDocuments).map((doc) => ({
+      id: doc.id,
+      name: doc.name,
+      size: formatFileSize(doc.size),
+      fileBuffer: doc.fileBuffer,
+    })),
+    ...recentFiles
+      .filter((rec) => !Object.keys(openDocuments).includes(rec.id))
+      .map((rec) => ({
+        id: rec.id,
+        name: rec.name,
+        size: rec.size,
+        fileBuffer: rec.fileBuffer,
+      })),
+  ];
 
   const activeTab = tabs.find((t) => t.id === activeTabId);
   const currentOpenDoc = openDocuments[activeTabId];
@@ -336,7 +384,7 @@ export default function GPREngineMain() {
         className="hidden"
       />
 
-      {/* 2. Barra Superior Global: Faixa 1 (Menus) + Faixa 2 (Abas + Busca) */}
+      {/* Barra Superior Global */}
       <GlobalHeader
         tabs={tabs}
         activeTabId={activeTabId}
@@ -347,13 +395,24 @@ export default function GPREngineMain() {
         onSearchChange={setSearchQuery}
       />
 
-      {/* Modais Flutuantes */}
+      {/* Modal de COMBINAR ARQUIVOS (Novo recurso funcional PR.006) */}
+      {isCombineModalOpen && (
+        <CombineFilesModal
+          isOpen={isCombineModalOpen}
+          onClose={() => setIsCombineModalOpen(false)}
+          initialFiles={filesAvailableForCombine}
+          onExecuteCombine={handleExecuteCombine}
+          onAddLocalFile={handleAddLocalFileForCombine}
+        />
+      )}
+
+      {/* Modais Flutuantes de Assinatura e Carimbo */}
       {isSignatureModalOpen && (
         <SignatureModal
           isOpen={isSignatureModalOpen}
           onClose={() => setIsSignatureModalOpen(false)}
           onSaveSignature={(dataUrl) => {
-            alert('Assinatura salva! Clique em qualquer ponto da página do documento para carimbar.');
+            alert('Assinatura salva com sucesso!');
             setIsSignatureModalOpen(false);
           }}
         />
@@ -362,14 +421,14 @@ export default function GPREngineMain() {
       {isStampPickerOpen && (
         <StampPicker
           onSelectStamp={(type, color) => {
-            alert(`Carimbo ${type} selecionado! Clique na página para aplicar.`);
+            alert(`Carimbo ${type} selecionado!`);
             setIsStampPickerOpen(false);
           }}
           onClose={() => setIsStampPickerOpen(false)}
         />
       )}
 
-      {/* 3 Telas Principais Baseadas na Aba Ativa */}
+      {/* 3 Telas Baseadas na Aba Ativa */}
       {activeTabId === 'home' && (
         <HomeScreen
           recentFiles={recentFiles}
