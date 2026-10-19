@@ -23,7 +23,7 @@ export default function PDFSuitePage() {
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
 
   const [activeTool, setActiveTool] = useState<ToolMode>('select');
-  const [selectedColor, setSelectedColor] = useState<string>('#3b82f6');
+  const [selectedColor, setSelectedColor] = useState<string>('#f59e0b');
   const [showStampPicker, setShowStampPicker] = useState<boolean>(false);
   const [activeStampType, setActiveStampType] = useState<
     'APROVADO' | 'CONFERIDO' | 'URGENTE' | 'MEDIDO GPR' | 'EM ANÁLISE' | null

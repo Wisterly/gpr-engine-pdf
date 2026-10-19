@@ -205,7 +205,7 @@ export const AnnotationOverlay: React.FC<AnnotationOverlayProps> = ({
             className="absolute group z-20 -translate-y-1/2"
           >
             {isEditing ? (
-              <div className="flex items-center gap-1 bg-brand-panel p-1.5 rounded-lg border border-brand-accent shadow-xl">
+              <div className="flex items-center gap-1 bg-brand-panel p-1.5 rounded-xl border border-amber-500 shadow-goldGlow">
                 <input
                   type="text"
                   autoFocus

@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --background: #0b111e;
-  --foreground: #f8fafc;
+  --background: #08080b;
+  --foreground: #fbfbfb;
 }
 
 body {
@@ -14,23 +14,25 @@ body {
   overflow: hidden;
 }
 
-/* Custom Sleek Scrollbar */
+/* Custom Sleek Gold & Dark Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0b111e;
+  background: #08080b;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #23385d;
+  background: #2a2318;
   border-radius: 9999px;
+  border: 1px solid rgba(245, 158, 11, 0.15);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3b82f6;
+  background: #f59e0b;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
 }
 
 /* Canvas smooth rendering */
@@ -39,7 +41,12 @@ canvas {
   image-rendering: crisp-edges;
 }
 
-/* User select rules */
+/* Custom Selection Highlight */
+::selection {
+  background: rgba(245, 158, 11, 0.35);
+  color: #ffffff;
+}
+
 .no-select {
   user-select: none;
   -webkit-user-select: none;

@@ -135,7 +135,7 @@ export const PDFCanvas: React.FC<PDFCanvasProps> = ({
       {isRendering && (
         <div className="absolute inset-0 bg-brand-dark/40 backdrop-blur-[1px] flex items-center justify-center pointer-events-none z-30">
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-panel/90 border border-brand-cardBorder text-white text-xs shadow-lg">
-            <Loader2 size={14} className="animate-spin text-brand-accent" />
+            <Loader2 size={14} className="animate-spin text-amber-400" />
             <span>Processando página...</span>
           </div>
         </div>
