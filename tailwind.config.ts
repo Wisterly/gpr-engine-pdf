@@ -10,44 +10,55 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "sans-serif"],
+        sans: ["Inter", "Plus Jakarta Sans", "-apple-system", "sans-serif"],
         mono: ["JetBrains Mono", "monospace"],
       },
       colors: {
+        obsidian: {
+          bg: "#0A0A0C",        // Preto Obsidiana puro
+          panel: "#121316",     // Grafite Escuro Fosco 1
+          panelDark: "#18191E", // Grafite Escuro Fosco 2
+          border: "#26272F",    // Borda e divisória
+          borderGold: "rgba(212, 175, 55, 0.18)",
+          card: "#15161C",
+          hover: "#1F2027",
+        },
+        gold: {
+          metallic: "#D4AF37",  // Dourado Metálico clássico
+          amber: "#F59E0B",     // Âmbar claro
+          light: "#FDE047",
+        },
+        orange: {
+          vibrant: "#FF7A00",   // Laranja Vibrante
+          primary: "#FF6B00",
+        },
         brand: {
-          dark: "#08080b",        // Ônix / Obsidian puro
-          panel: "#0f0f15",       // Painel escuro nobre
-          card: "#15151f",        // Superfície de card escuro
-          cardBorder: "#2a2318",  // Borda refinada com tom ouro envelhecido / bronze
-          borderGold: "rgba(245, 158, 11, 0.28)",
-          accent: "#f59e0b",      // Dourado Nobre
-          accentHover: "#d97706", // Âmbar Intenso
-          orange: "#f97316",      // Laranja Real
-          orangeHover: "#ea580c",
-          gold: "#eab308",        // Ouro Vivo
-          goldLight: "#fde68a",   // Champanhe / Marfim
-          bronze: "#b45309",      // Bronze
-          amber: "#f59e0b",
-          emerald: "#10b981",
-          rose: "#f43f5e",
-          purple: "#a855f7",
-          cyan: "#06b6d4",
-          muted: "#9ca3af",       // Cinza neutro elegante
-          mutedGold: "#a3907c",   // Muted dourado sutil
-          text: "#fbfbfb",        // Branco puro suave
+          dark: "#0A0A0C",
+          panel: "#121316",
+          card: "#18191E",
+          cardBorder: "#26272F",
+          accent: "#D4AF37",
+          accentHover: "#FF6B00",
+          orange: "#FF7A00",
+          gold: "#D4AF37",
+          amber: "#F59E0B",
+          emerald: "#10B981",
+          rose: "#EF4444",
+          muted: "#8E919F",
+          mutedGold: "#A39371",
+          text: "#F5F5F7",
         },
       },
       boxShadow: {
-        subtle: "0 4px 20px -2px rgba(0, 0, 0, 0.7)",
-        glass: "0 8px 32px 0 rgba(0, 0, 0, 0.6)",
-        goldGlow: "0 0 25px -4px rgba(245, 158, 11, 0.28)",
-        goldGlowLg: "0 0 40px -2px rgba(245, 158, 11, 0.4)",
-        orangeGlow: "0 0 25px -4px rgba(249, 115, 22, 0.3)",
+        subtle: "0 4px 20px -2px rgba(0, 0, 0, 0.8)",
+        goldGlow: "0 0 20px -3px rgba(212, 175, 55, 0.25)",
+        goldGlowLg: "0 0 35px -2px rgba(212, 175, 55, 0.35)",
+        orangeGlow: "0 0 25px -4px rgba(255, 107, 0, 0.3)",
       },
       backgroundImage: {
-        'gold-gradient': 'linear-gradient(135deg, #f59e0b 0%, #f97316 50%, #d97706 100%)',
-        'gold-metallic': 'linear-gradient(135deg, #fde68a 0%, #f59e0b 50%, #b45309 100%)',
-        'dark-luxury': 'radial-gradient(ellipse at top, #1c1813 0%, #08080b 70%)',
+        'gradient-orange-gold': 'linear-gradient(135deg, #FF6B00 0%, #D4AF37 100%)',
+        'gradient-gold-metallic': 'linear-gradient(135deg, #FDE047 0%, #D4AF37 50%, #B45309 100%)',
+        'gradient-tab-active': 'linear-gradient(to right, #FF6B00, #D4AF37)',
       },
     },
   },

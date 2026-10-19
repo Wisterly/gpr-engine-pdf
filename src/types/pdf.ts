@@ -40,8 +40,8 @@ export interface DrawingPath {
 
 export interface TextAnnotation {
   id: string;
-  x: number; // 0 a 1
-  y: number; // 0 a 1
+  x: number;
+  y: number;
   text: string;
   fontSize: number;
   color: string;
@@ -90,7 +90,7 @@ export interface SignatureAnnotation {
   y: number;
   width: number;
   height: number;
-  dataUrl: string; // Imagem PNG da assinatura
+  dataUrl: string;
 }
 
 export interface FormMarkAnnotation {
@@ -114,17 +114,56 @@ export interface PageAnnotations {
 }
 
 export interface PDFPageInfo {
-  pageIndex: number; // 0-based
-  pageNumber: number; // 1-based
+  pageIndex: number;
+  pageNumber: number;
   width: number;
   height: number;
-  rotation: number; // 0, 90, 180, 270
+  rotation: number;
   isDeleted?: boolean;
 }
 
 export interface LoadedPDFDocument {
+  id: string;
   name: string;
   size: number;
-  totalPages: number;
   fileBuffer: ArrayBuffer;
+  pdfDoc: any;
+  pages: PDFPageInfo[];
+  pageAnnotations: Record<number, PageAnnotations>;
+  currentPage: number;
+  zoom: number;
+}
+
+export type MainTabId = 'home' | 'tools' | string; // 'home' | 'tools' | docId
+
+export interface OpenTab {
+  id: string;
+  title: string;
+  type: 'home' | 'tools' | 'document';
+  docId?: string;
+}
+
+export interface RecentFile {
+  id: string;
+  name: string;
+  openedAt: string;
+  size: string;
+  sizeBytes: number;
+  isFavorite?: boolean;
+  fileBuffer?: ArrayBuffer;
+}
+
+export interface ToolItem {
+  id: string;
+  name: string;
+  actionText: 'Abrir ▾' | 'Adicionar ▾';
+  icon: string;
+  isNew?: boolean;
+  category: string;
+  description?: string;
+}
+
+export interface ToolCategory {
+  title: string;
+  items: ToolItem[];
 }
