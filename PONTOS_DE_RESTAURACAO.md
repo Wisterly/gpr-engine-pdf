@@ -22,11 +22,30 @@ Toda e qualquer restauração solicitada por você (ex: `PR.001`, `PR.002`, `PR.
 
 ---
 
+### [PR.007]
+- **Data/Hora:** 19/10/2026 00:23 (Horário Local)
+- **Commit Git:** `PR.007` (local e remoto no GitHub)
+- **Tag Git:** `PR.007` (local e remota no GitHub)
+- **Status:** Ativo / Em Produção
+- **Links:**
+  - Produção Oficial (Vercel): https://gpr-engine-pdf.vercel.app
+  - Repositório GitHub: https://github.com/Wisterly/gpr-engine-pdf
+  - Localhost: http://localhost:3000
+
+#### 🎯 NOVIDADES & FUNCIONALIDADES IMPLEMENTADAS (PR.007):
+- **Camada de Persistência Permanente de Dados (IndexedDB + LocalStorage)**:
+  - *Garantia Absoluta Anti-Reset*: Todos os arquivos PDF anexados pelo usuário (incluindo seus buffers binários integrais), documentos combinados gerados e favoritos são salvos de forma assíncrona no IndexedDB do navegador (`GPR_ENGINE_DB`).
+  - *Sobrevivência a Reloads e Deploys*: Ao recarregar a página ou após novos deploys de código na nuvem (Vercel), a aplicação recupera automaticamente todos os PDFs anexados e configurações previamente salvas, sem nunca sobrescrever ou zerar o trabalho do usuário.
+  - *Persistência de Customizações*: As preferências de ferramentas rápidas personalizadas, temas e ajustes de interface são mantidas intactas.
+  - *Favoritos Interativos*: A estrela de favorito na lista e grade agora alterna o estado e grava diretamente a preferência no banco de dados local.
+
+---
+
 ### [PR.006]
 - **Data/Hora:** 19/10/2026 00:02 (Horário Local)
 - **Commit Git:** `PR.006` (local e remoto no GitHub)
 - **Tag Git:** `PR.006` (local e remota no GitHub)
-- **Status:** Ativo / Em Produção
+- **Status:** Arquivado / Sucessor: PR.007
 - **Links:**
   - Produção Oficial (Vercel): https://gpr-engine-pdf.vercel.app
   - Repositório GitHub: https://github.com/Wisterly/gpr-engine-pdf

@@ -19,6 +19,11 @@ import { CombineFilesModal } from '@/components/CombineFilesModal';
 import { combinePDFDocuments, CombineFileInput } from '@/lib/pdfCombine';
 import { generateExportedPDF } from '@/lib/pdfExport';
 import { formatFileSize } from '@/lib/utils';
+import {
+  persistUserFile,
+  getPersistedUserFiles,
+  togglePersistedFavorite,
+} from '@/lib/storage';
 
 const INITIAL_RECENT_FILES: RecentFile[] = [
   {
@@ -62,8 +67,27 @@ export default function GPREngineMain() {
   const [activeTabId, setActiveTabId] = useState<string>('home');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Arquivos Recentes
+  // Arquivos Recentes (Inicial + Persistidos)
   const [recentFiles, setRecentFiles] = useState<RecentFile[]>(INITIAL_RECENT_FILES);
+
+  // Carrega permanentemente do IndexedDB todos os PDFs reais que o usuário já anexou
+  useEffect(() => {
+    const loadPersistedDocuments = async () => {
+      try {
+        const persisted = await getPersistedUserFiles();
+        if (persisted && persisted.length > 0) {
+          setRecentFiles((prev) => {
+            const persistedNames = new Set(persisted.map((f) => f.name));
+            const filteredDefaults = prev.filter((f) => !persistedNames.has(f.name));
+            return [...persisted, ...filteredDefaults];
+          });
+        }
+      } catch (err) {
+        console.warn('Erro ao carregar documentos persistidos:', err);
+      }
+    };
+    loadPersistedDocuments();
+  }, []);
 
   // Documentos Abertos (Chave: docId)
   const [openDocuments, setOpenDocuments] = useState<Record<string, LoadedPDFDocument>>({});
@@ -217,15 +241,20 @@ export default function GPREngineMain() {
       const buffer = await file.arrayBuffer();
       await loadDocumentFromBuffer(docId, file.name, buffer, file.size);
 
+      const newRecent: RecentFile = {
+        id: docId,
+        name: file.name,
+        openedAt: 'Agora',
+        size: formatFileSize(file.size),
+        sizeBytes: file.size,
+        fileBuffer: buffer,
+      };
+
+      // Persiste permanentemente no IndexedDB do navegador
+      await persistUserFile(newRecent);
+
       setRecentFiles((prev) => [
-        {
-          id: docId,
-          name: file.name,
-          openedAt: 'Agora',
-          size: formatFileSize(file.size),
-          sizeBytes: file.size,
-          fileBuffer: buffer,
-        },
+        newRecent,
         ...prev.filter((f) => f.name !== file.name),
       ]);
     },
@@ -305,18 +334,21 @@ export default function GPREngineMain() {
     // Carrega como novo documento ativo em uma nova aba
     await loadDocumentFromBuffer(combinedDocId, combinedDocName, arrayBuffer, arrayBuffer.byteLength);
 
-    // Registra na lista de recentes
+    // Registra na lista de recentes e persiste no IndexedDB
+    const newCombinedRecent: RecentFile = {
+      id: combinedDocId,
+      name: combinedDocName,
+      openedAt: 'Agora (Combinado)',
+      size: formatFileSize(arrayBuffer.byteLength),
+      sizeBytes: arrayBuffer.byteLength,
+      fileBuffer: arrayBuffer,
+      isFavorite: true,
+    };
+    await persistUserFile(newCombinedRecent);
+
     setRecentFiles((prev) => [
-      {
-        id: combinedDocId,
-        name: combinedDocName,
-        openedAt: 'Agora (Combinado)',
-        size: formatFileSize(arrayBuffer.byteLength),
-        sizeBytes: arrayBuffer.byteLength,
-        fileBuffer: arrayBuffer,
-        isFavorite: true,
-      },
-      ...prev,
+      newCombinedRecent,
+      ...prev.filter((f) => f.name !== combinedDocName),
     ]);
   };
 
@@ -347,6 +379,21 @@ export default function GPREngineMain() {
         await handleOpenRecentFile(recentFiles[0]);
       }
     }
+  };
+
+  // Alternar favorito com persistência no IndexedDB
+  const handleToggleFavorite = async (fileId: string) => {
+    let nextFavState = false;
+    setRecentFiles((prev) =>
+      prev.map((f) => {
+        if (f.id === fileId) {
+          nextFavState = !f.isFavorite;
+          return { ...f, isFavorite: nextFavState };
+        }
+        return f;
+      })
+    );
+    await togglePersistedFavorite(fileId, nextFavState);
   };
 
   // Prepara lista de arquivos disponíveis para o modal de combinação
@@ -436,6 +483,7 @@ export default function GPREngineMain() {
           onUploadFile={handleUploadFile}
           onGoToToolsTab={() => setActiveTabId('tools')}
           onQuickAction={handleToolSelection}
+          onToggleFavorite={handleToggleFavorite}
         />
       )}
 

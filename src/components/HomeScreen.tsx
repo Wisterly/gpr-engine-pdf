@@ -35,6 +35,7 @@ interface HomeScreenProps {
   onUploadFile: (file: File) => void;
   onGoToToolsTab: () => void;
   onQuickAction: (action: string) => void;
+  onToggleFavorite?: (fileId: string) => void;
 }
 
 interface QuickToolDef {
@@ -66,6 +67,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onUploadFile,
   onGoToToolsTab,
   onQuickAction,
+  onToggleFavorite,
 }) => {
   const [activeSideMenu, setActiveSideMenu] = useState<'recents' | 'favorites'>('recents');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
@@ -397,9 +399,20 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                       <td className="py-2.5 px-4 font-semibold text-white group-hover:text-gold-metallic transition-colors">
                         <div className="flex items-center gap-2">
                           <span>{file.name}</span>
-                          {file.isFavorite && (
-                            <Star size={11} className="text-gold-metallic fill-gold-metallic" />
-                          )}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onToggleFavorite?.(file.id);
+                            }}
+                            title={file.isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+                            className="p-1 text-gold-metallic/50 hover:text-gold-metallic transition-colors"
+                          >
+                            <Star
+                              size={12}
+                              className={file.isFavorite ? 'text-gold-metallic fill-gold-metallic' : 'text-brand-muted hover:text-gold-metallic'}
+                            />
+                          </button>
                         </div>
                       </td>
                       <td className="py-2.5 px-4 text-brand-muted font-mono text-[11px]">
@@ -422,8 +435,22 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   onClick={() => onOpenFile(file)}
                   className="p-3.5 rounded-2xl bg-obsidian-panel border border-obsidian-border hover:border-gold-metallic/50 hover:bg-obsidian-hover transition-all cursor-pointer shadow-subtle group flex flex-col justify-between"
                 >
-                  <div className="aspect-[4/3] rounded-xl bg-obsidian-card border border-obsidian-border flex items-center justify-center mb-2.5 group-hover:scale-102 transition-transform">
+                  <div className="relative aspect-[4/3] rounded-xl bg-obsidian-card border border-obsidian-border flex items-center justify-center mb-2.5 group-hover:scale-102 transition-transform">
                     <FileText size={32} className="text-orange-vibrant group-hover:text-gold-metallic" />
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onToggleFavorite?.(file.id);
+                      }}
+                      title={file.isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+                      className="absolute top-2 right-2 p-1 rounded-md bg-obsidian-panel/80 hover:bg-obsidian-panel text-gold-metallic/60 hover:text-gold-metallic transition-colors"
+                    >
+                      <Star
+                        size={12}
+                        className={file.isFavorite ? 'text-gold-metallic fill-gold-metallic' : 'text-brand-muted'}
+                      />
+                    </button>
                   </div>
                   <div>
                     <h4 className="text-xs font-bold text-white group-hover:text-gold-metallic truncate mb-0.5">
