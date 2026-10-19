@@ -27,7 +27,7 @@ interface CombineFilesModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialFiles: { id: string; name: string; size: string; fileBuffer?: ArrayBuffer }[];
-  onExecuteCombine: (selectedFiles: { id: string; name: string; fileBuffer: ArrayBuffer }[]) => Promise<void>;
+  onExecuteCombine: (selectedFiles: { id: string; name: string; fileBuffer?: ArrayBuffer }[]) => Promise<void>;
   onAddLocalFile: (file: File) => Promise<{ id: string; name: string; size: string; fileBuffer: ArrayBuffer }>;
 }
 
@@ -99,7 +99,7 @@ export const CombineFilesModal: React.FC<CombineFilesModalProps> = ({
   };
 
   const handleCombineClick = async () => {
-    const selected = filesList.filter((f) => f.isSelected && f.fileBuffer);
+    const selected = filesList.filter((f) => f.isSelected);
     if (selected.length < 2) {
       alert('Por favor, selecione pelo menos 2 arquivos PDF para combinar.');
       return;
@@ -111,13 +111,13 @@ export const CombineFilesModal: React.FC<CombineFilesModalProps> = ({
         selected.map((s) => ({
           id: s.id,
           name: s.name,
-          fileBuffer: s.fileBuffer!,
+          fileBuffer: s.fileBuffer,
         }))
       );
       onClose();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Falha ao combinar arquivos:', err);
-      alert('Ocorreu um erro ao combinar os arquivos selecionados.');
+      alert(err?.message || 'Ocorreu um erro ao combinar os arquivos selecionados.');
     } finally {
       setIsCombining(false);
     }

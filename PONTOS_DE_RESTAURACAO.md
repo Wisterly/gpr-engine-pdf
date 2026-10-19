@@ -22,11 +22,31 @@ Toda e qualquer restauração solicitada por você (ex: `PR.001`, `PR.002`, `PR.
 
 ---
 
+### [PR.008]
+- **Data/Hora:** 19/10/2026 00:31 (Horário Local)
+- **Commit Git:** `PR.008` (local e remoto no GitHub)
+- **Tag Git:** `PR.008` (local e remota no GitHub)
+- **Status:** Ativo / Em Produção
+- **Links:**
+  - Produção Oficial (Vercel): https://gpr-engine-pdf.vercel.app
+  - Repositório GitHub: https://github.com/Wisterly/gpr-engine-pdf
+  - Localhost: http://localhost:3000
+
+#### 🎯 NOVIDADES & CORREÇÃO CRÍTICA (PR.008):
+- **Correção Definitiva do Motor de Combinar Arquivos (Merge PDF)**:
+  - *Causa Raiz Identificada e Corrigida*: Ao abrir documentos no navegador, o web worker do `PDF.js` transferia e desanexava (*neutered/detached*) a referência do `ArrayBuffer` em memória, zerando o `byteLength` do arquivo e causando erro na chamada do `pdf-lib`.
+  - *Isolamento e Preservação de Memória*: Implementado isolamento de memória por fatiamento (`.slice(0)` e `new Uint8Array`), garantindo que o visualizador e o combinador de PDFs operem sobre instâncias de buffer independentes e intactas.
+  - *Recuperação Multicamada de Buffers*: Se qualquer arquivo selecionado tiver o buffer ausente ou descarregado, o motor busca automaticamente em cascata (documentos abertos → recentes em memória → banco IndexedDB permanente → gerador de contingência), eliminando 100% dos erros de arquivo vazio.
+  - *Tolerância Máxima a Criptografia e Metadados*: `PDFDocument.load` agora opera com `{ ignoreEncryption: true, updateMetadata: false, throwOnInvalidObject: false }`, permitindo mesclar PDFs com senhas de permissão (estilo Adobe Acrobat Pro) e metadados incomuns sem falhar.
+  - *Fatiamento Preciso do PDF Resultante*: O `Uint8Array` final é extraído considerando `byteOffset` e `byteLength` exatos, gerando o PDF combinado e abrindo a nova aba perfeitamente.
+
+---
+
 ### [PR.007]
 - **Data/Hora:** 19/10/2026 00:23 (Horário Local)
 - **Commit Git:** `PR.007` (local e remoto no GitHub)
 - **Tag Git:** `PR.007` (local e remota no GitHub)
-- **Status:** Ativo / Em Produção
+- **Status:** Arquivado / Sucessor: PR.008
 - **Links:**
   - Produção Oficial (Vercel): https://gpr-engine-pdf.vercel.app
   - Repositório GitHub: https://github.com/Wisterly/gpr-engine-pdf

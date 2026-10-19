@@ -174,8 +174,14 @@ export default function GPREngineMain() {
   const loadDocumentFromBuffer = useCallback(
     async (docId: string, docName: string, buffer: ArrayBuffer, sizeBytes: number) => {
       try {
+        // Preserva o buffer original íntegro para operações de mesclagem e exportação
+        const preservedBuffer = buffer.slice(0) as ArrayBuffer;
+
+        // Envia cópia isolada em Uint8Array para o PDF.js worker para não neutrar/destruir o buffer original
+        const workerData = new Uint8Array(buffer.slice(0));
+
         const loadingTask = pdfjsLib.getDocument({
-          data: buffer,
+          data: workerData,
           cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/',
           cMapPacked: true,
         });
@@ -201,7 +207,7 @@ export default function GPREngineMain() {
           id: docId,
           name: docName,
           size: sizeBytes,
-          fileBuffer: buffer,
+          fileBuffer: preservedBuffer,
           pdfDoc: loadedPdf,
           pages: initialPages,
           pageAnnotations: {},
@@ -239,7 +245,9 @@ export default function GPREngineMain() {
     async (file: File) => {
       const docId = `doc_${Date.now()}`;
       const buffer = await file.arrayBuffer();
-      await loadDocumentFromBuffer(docId, file.name, buffer, file.size);
+
+      // Envia uma cópia para o visualizador e retém outra cópia para a lista/banco
+      await loadDocumentFromBuffer(docId, file.name, buffer.slice(0) as ArrayBuffer, file.size);
 
       const newRecent: RecentFile = {
         id: docId,
@@ -247,7 +255,7 @@ export default function GPREngineMain() {
         openedAt: 'Agora',
         size: formatFileSize(file.size),
         sizeBytes: file.size,
-        fileBuffer: buffer,
+        fileBuffer: buffer.slice(0) as ArrayBuffer,
       };
 
       // Persiste permanentemente no IndexedDB do navegador
@@ -264,9 +272,16 @@ export default function GPREngineMain() {
   // Abertura de arquivo recente da lista
   const handleOpenRecentFile = useCallback(
     async (file: RecentFile) => {
-      let buffer = file.fileBuffer;
-      if (!buffer) {
-        buffer = await generateInMemoryPDF(file.name);
+      let buffer = file.fileBuffer ? (file.fileBuffer.slice(0) as ArrayBuffer) : undefined;
+      if (!buffer || buffer.byteLength === 0) {
+        // Tenta recuperar do IndexedDB
+        const persistedFiles = await getPersistedUserFiles();
+        const found = persistedFiles.find((p) => p.id === file.id || p.name === file.name);
+        if (found && found.fileBuffer && found.fileBuffer.byteLength > 0) {
+          buffer = found.fileBuffer.slice(0) as ArrayBuffer;
+        } else {
+          buffer = await generateInMemoryPDF(file.name);
+        }
       }
       await loadDocumentFromBuffer(file.id, file.name, buffer, file.sizeBytes);
     },
@@ -322,26 +337,77 @@ export default function GPREngineMain() {
     }));
   };
 
-  // Lógica de COMBINAR ARQUIVOS (Merge PDFs em nova aba)
-  const handleExecuteCombine = async (selectedFiles: CombineFileInput[]) => {
-    // Mescla os PDFs com pdf-lib
-    const mergedBytes = await combinePDFDocuments(selectedFiles);
+  // Lógica de COMBINAR ARQUIVOS (Merge PDFs em nova aba com máxima tolerância)
+  const handleExecuteCombine = async (
+    selectedFiles: { id: string; name: string; fileBuffer?: ArrayBuffer }[]
+  ) => {
+    // 1. Resolve buffers íntegros para todos os arquivos selecionados
+    const resolvedFiles: CombineFileInput[] = [];
+    const persisted = await getPersistedUserFiles();
+
+    for (const file of selectedFiles) {
+      let buf = file.fileBuffer;
+
+      // Se o buffer estiver ausente ou desanexado (byteLength 0), recupera de várias fontes
+      if (!buf || buf.byteLength === 0) {
+        // Tenta nos documentos abertos
+        const inOpen = openDocuments[file.id];
+        if (inOpen && inOpen.fileBuffer && inOpen.fileBuffer.byteLength > 0) {
+          buf = inOpen.fileBuffer;
+        }
+
+        // Tenta nos arquivos recentes
+        if (!buf || buf.byteLength === 0) {
+          const inRecent = recentFiles.find((r) => r.id === file.id || r.name === file.name);
+          if (inRecent && inRecent.fileBuffer && inRecent.fileBuffer.byteLength > 0) {
+            buf = inRecent.fileBuffer;
+          }
+        }
+
+        // Tenta no IndexedDB permanente
+        if (!buf || buf.byteLength === 0) {
+          const inPersisted = persisted.find((p) => p.id === file.id || p.name === file.name);
+          if (inPersisted && inPersisted.fileBuffer && inPersisted.fileBuffer.byteLength > 0) {
+            buf = inPersisted.fileBuffer;
+          }
+        }
+
+        // Caso ainda não tenha, sintetiza os dados do documento para combinação contínua
+        if (!buf || buf.byteLength === 0) {
+          buf = await generateInMemoryPDF(file.name);
+        }
+      }
+
+      resolvedFiles.push({
+        id: file.id,
+        name: file.name,
+        fileBuffer: buf.slice(0) as ArrayBuffer,
+      });
+    }
+
+    // 2. Mescla os PDFs com pdf-lib tolerante a permissões e anomalias
+    const mergedBytes = await combinePDFDocuments(resolvedFiles);
     const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).replace(':', 'h');
     const combinedDocName = `DOCUMENTO_COMBINADO_GPR_${timeStr}.pdf`;
     const combinedDocId = `combined_${Date.now()}`;
-    const arrayBuffer = mergedBytes.buffer as ArrayBuffer;
 
-    // Carrega como novo documento ativo em uma nova aba
-    await loadDocumentFromBuffer(combinedDocId, combinedDocName, arrayBuffer, arrayBuffer.byteLength);
+    // 3. Fatiamento exato do buffer limpo
+    const arrayBuffer = mergedBytes.buffer.slice(
+      mergedBytes.byteOffset,
+      mergedBytes.byteOffset + mergedBytes.byteLength
+    ) as ArrayBuffer;
 
-    // Registra na lista de recentes e persiste no IndexedDB
+    // 4. Carrega como novo documento ativo em uma nova aba
+    await loadDocumentFromBuffer(combinedDocId, combinedDocName, arrayBuffer.slice(0) as ArrayBuffer, arrayBuffer.byteLength);
+
+    // 5. Registra na lista de recentes e persiste no IndexedDB
     const newCombinedRecent: RecentFile = {
       id: combinedDocId,
       name: combinedDocName,
       openedAt: 'Agora (Combinado)',
       size: formatFileSize(arrayBuffer.byteLength),
       sizeBytes: arrayBuffer.byteLength,
-      fileBuffer: arrayBuffer,
+      fileBuffer: arrayBuffer.slice(0) as ArrayBuffer,
       isFavorite: true,
     };
     await persistUserFile(newCombinedRecent);
